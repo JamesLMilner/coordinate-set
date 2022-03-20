@@ -9,7 +9,7 @@ set.add([32.95, 83.31]);
 expect(set.size).toBe(2);
 ```
 
-This behaves as we would expect for a JavaScript `Set` - it creates two entries for each `Array` reference. However, this library, in simple terms, allows coordinate Arrays (of type `[number, number]`, where [0] is a valid longitude and [1] is valid latitude) to be treated as values rather than references, like so:
+This behaves as we would expect for a JavaScript `Set` - it creates two entries for each `Array` reference. In simple terms this library allows coordinate Arrays (of type `[number, number]`, where [0] is a valid longitude and [1] is valid latitude, which are often seen in formats like [GeoJSON](https://www.rfc-editor.org/rfc/rfc7946.html#section-3.1.1)) to be treated as values rather than references, like so:
 
 ```javascript
 const set = new CoordinateSet();
@@ -18,7 +18,7 @@ set.add([32.95, 83.31]);
 expect(set.size).toBe(1);
 ```
 
-The API matches the original `Set` API as closely as possible.
+The API matches the original `Set` API as closely as possible. The library also does basic validation on the input array to make sure it is a valid longitude, latitude pair.
 
 ## Install
 
