@@ -1,0 +1,35 @@
+{
+  "name": "coordinate-set",
+  "version": "1.0.0",
+  "description": "A Set that treats coordinate arrays like values rather than references",
+  "author": "James Milner",
+  "license": "MIT",
+  "type": "module",
+  "source": "src/coordinate-set.ts",
+  "exports": {
+    "require": "./dist/coordinate-set.cjs",
+    "default": "./dist/coordinate-set.modern.js"
+  },
+  "main": "./dist/coordinate-set.cjs",
+  "module": "./dist/coordinate-set.module.js",
+  "unpkg": "./dist/coordinate-set.umd.js",
+  "scripts": {
+    "build": "microbundle",
+    "dev": "microbundle watch",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "devDependencies": {
+    "@types/jest": "27.4.0",
+    "jest": "27.5.1",
+    "jest-cli": "27.5.1",
+    "microbundle": "0.14.2",
+    "ts-jest": "27.1.3",
+    "ts-node": "10.5.0",
+    "typescript": "4.5.5"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node"
+  }
+}
