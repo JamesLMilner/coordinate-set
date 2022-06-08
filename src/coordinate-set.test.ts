@@ -19,6 +19,12 @@ describe("CoordinateSet", () => {
         new CoordinateSet(1 as any);
       }).not.toThrowError();
     });
+
+    it("CoordinateSet is passed", () => {
+      expect(() => {
+        new CoordinateSet(new CoordinateSet());
+      }).not.toThrowError();
+    });
   });
 
   describe("iterator", () => {
@@ -28,20 +34,7 @@ describe("CoordinateSet", () => {
       [2, 2],
     ] as [number, number][];
 
-    const output = [
-      [
-        [0, 0],
-        [0, 0],
-      ],
-      [
-        [1, 1],
-        [1, 1],
-      ],
-      [
-        [2, 2],
-        [2, 2],
-      ],
-    ];
+    const output = [...input];
 
     it("for...of", () => {
       const set = new CoordinateSet(input);
@@ -84,51 +77,64 @@ describe("CoordinateSet", () => {
         values.push(entry);
       }
 
-      expect(values).toStrictEqual(output);
+      expect(values).toStrictEqual([
+        [
+          [0, 0],
+          [0, 0],
+        ],
+        [
+          [1, 1],
+          [1, 1],
+        ],
+        [
+          [2, 2],
+          [2, 2],
+        ],
+      ]);
     });
   });
 
   describe("has/add", () => {
-    it("does not have coordinate", () => {
+    it("has method returns false when it does not have coordinate", () => {
       const set = new CoordinateSet();
       expect(set.has([0.1, 0.2])).toBe(false);
     });
 
-    it("does have coordinate", () => {
+    it("has method returns true when that coordinate has been added", () => {
       const set = new CoordinateSet();
       set.add([0.1, 0.2]);
       expect(set.has([0.1, 0.2])).toBe(true);
     });
 
-    it("has throws for bad longitude", () => {
+    it("has method throws for invalid longitude", () => {
       const set = new CoordinateSet();
       expect(() => {
         set.has([181, 0.2]);
       }).toThrow();
     });
 
-    it("has throws for bad latitude", () => {
+    it("has method throws for invalid latitude", () => {
       const set = new CoordinateSet();
       expect(() => {
         set.has([0, 91]);
       }).toThrow();
     });
 
-    it("add throws for bad longitude", () => {
+    it("add method throws for invalid longitude", () => {
       const set = new CoordinateSet();
       expect(() => {
         set.add([181, 0.2]);
       }).toThrow();
     });
 
-    it("add throws for bad latitude", () => {
+    it("add method throws for invalid latitude", () => {
       const set = new CoordinateSet();
       expect(() => {
         set.add([0, 91]);
       }).toThrow();
     });
 
-    it("CoordinateSet works as an argument", () => {
+    it("has method can check that CoordinateSet works as an argument", () => {
       expect(() => {
         const set = new CoordinateSet(new CoordinateSet([[0.1, 0.2]]));
         set.has([0.1, 0.2]);
@@ -151,7 +157,7 @@ describe("CoordinateSet", () => {
       expect(set.delete([0.1, 0.2])).toBe(false);
     });
 
-    it("throws for bad coordinate", () => {
+    it("throws for invalid coordinate", () => {
       const set = new CoordinateSet();
       expect(() => {
         set.delete([181, 0.2]);
@@ -222,9 +228,153 @@ describe("CoordinateSet", () => {
       expect(set.has([0.1, 0.2])).toBe(true);
     });
 
+    it("CoordinateSet argument sets values correctly", () => {
+      const set = new CoordinateSet([[0.1, 0.2]]);
+      const anotherSet = new CoordinateSet(set);
+      expect(anotherSet.size).toBe(1);
+      expect(anotherSet.has([0.1, 0.2])).toBe(true);
+    });
+
     it("non array argument", () => {
       const set = new CoordinateSet(1 as any);
       expect(set.size).toBe(0);
+    });
+  });
+
+  describe("isSuperset", () => {
+    function isSuperset(set: CoordinateSet, subset: CoordinateSet) {
+      for (let elem of subset) {
+        if (!set.has(elem)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    it("determines correct supersets", () => {
+      expect(
+        isSuperset(
+          new CoordinateSet([
+            [1, 1],
+            [2, 2],
+          ]),
+          new CoordinateSet([[1, 1]])
+        )
+      ).toBe(true);
+    });
+
+    it("determines correct non supersets", () => {
+      expect(
+        isSuperset(new CoordinateSet([[2, 2]]), new CoordinateSet([[1, 1]]))
+      ).toBe(false);
+    });
+  });
+
+  describe("union", () => {
+    function union(setA: CoordinateSet, setB: CoordinateSet) {
+      let _union = new CoordinateSet(setA);
+      for (let elem of setB) {
+        _union.add(elem);
+      }
+      return _union;
+    }
+
+    it("performs union correctly", () => {
+      const unioned = union(
+        new CoordinateSet([
+          [1, 1],
+          [2, 2],
+        ]),
+        new CoordinateSet([[1, 1]])
+      );
+
+      expect(unioned.size).toBe(2);
+      expect(unioned.has([1, 1])).toBe(true);
+      expect(unioned.has([2, 2])).toBe(true);
+    });
+  });
+
+  describe("intersection", () => {
+    function intersection(setA: CoordinateSet, setB: CoordinateSet) {
+      let _intersection = new CoordinateSet();
+      for (let elem of setB) {
+        if (setA.has(elem)) {
+          _intersection.add(elem);
+        }
+      }
+      return _intersection;
+    }
+
+    it("performs intersection correctly", () => {
+      const intersectioned = intersection(
+        new CoordinateSet([
+          [1, 1],
+          [2, 2],
+        ]),
+        new CoordinateSet([
+          [1, 1],
+          [3, 3],
+        ])
+      );
+
+      expect(intersectioned.size).toBe(1);
+      expect(intersectioned.has([1, 1])).toBe(true);
+    });
+  });
+
+  describe("intersection", () => {
+    function symmetricDifference(setA, setB) {
+      let _difference = new CoordinateSet(setA);
+      for (let elem of setB) {
+        if (_difference.has(elem)) {
+          _difference.delete(elem);
+        } else {
+          _difference.add(elem);
+        }
+      }
+      return _difference;
+    }
+
+    it("performs symmetric difference correctly", () => {
+      const symmetricDiff = symmetricDifference(
+        new CoordinateSet([
+          [1, 1],
+          [2, 2],
+        ]),
+        new CoordinateSet([
+          [1, 1],
+          [3, 3],
+        ])
+      );
+
+      expect(symmetricDiff.size).toBe(2);
+      expect(symmetricDiff.has([2, 2])).toBe(true);
+      expect(symmetricDiff.has([3, 3])).toBe(true);
+    });
+  });
+
+  describe("difference", () => {
+    function difference(setA: CoordinateSet, setB: CoordinateSet) {
+      let _difference = new CoordinateSet(setA);
+      for (let elem of setB) {
+        _difference.delete(elem);
+      }
+      return _difference;
+    }
+
+    it("performs symmetric difference correctly", () => {
+      const diff = difference(
+        new CoordinateSet([
+          [1, 1],
+          [2, 2],
+        ]),
+        new CoordinateSet([
+          [1, 1],
+          [3, 3],
+        ])
+      );
+      expect(diff.size).toBe(1);
+      expect(diff.has([2, 2])).toBe(true);
     });
   });
 });

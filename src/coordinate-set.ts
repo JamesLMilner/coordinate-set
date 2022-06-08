@@ -39,14 +39,23 @@ export class CoordinateSet {
 
   *[Symbol.iterator]() {
     for (let entry of this._map.entries()) {
-      yield [entry[1], entry[1]];
+      yield entry[1];
     }
   }
 
+  /** The entries() method returns a new Iterator object that contains an array of [value, value] */
   entries() {
-    return this[Symbol.iterator]();
+    const map = this._map;
+    return {
+      [Symbol.iterator]: function* () {
+        for (let entry of map.entries()) {
+          yield [entry[1], entry[1]];
+        }
+      },
+    };
   }
 
+  /** Executes a provided function once for each set coordinate. */
   forEach(
     callback: (
       value: [number, number],
@@ -59,19 +68,22 @@ export class CoordinateSet {
     });
   }
 
-  // O(1)
+  /** Gets the number of coordinates in the set */
   get size(): number {
     return this._size;
   }
 
-  // Ignore setting the size property publically
-  set size(value: number) {}
+  set size(value: number) {
+    // Ignore setting the size property publically
+  }
 
+  /** Determines if a given coordinate is present in the set */
   has(coordinate: [number, number]) {
     this._validateCoordinate(coordinate);
     return Boolean(this._map.get(this._getKey(coordinate)));
   }
 
+  /** Adds a passed coordinate to the set */
   add(coordinate: [number, number]) {
     this._validateCoordinate(coordinate);
     const key = this._getKey(coordinate);
@@ -83,6 +95,7 @@ export class CoordinateSet {
     return this;
   }
 
+  /** Deletes a coordinate from the set */
   delete(coordinate: [number, number]): boolean {
     this._validateCoordinate(coordinate);
     const key = this._getKey(coordinate);
@@ -93,6 +106,7 @@ export class CoordinateSet {
     return this._map.delete(key);
   }
 
+  /** Removes all coordinates from the set */
   clear() {
     this._map = new Map();
     this._size = 0;
